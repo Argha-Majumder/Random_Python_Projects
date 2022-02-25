@@ -1,4 +1,4 @@
-"""              COnway's Game of Life
+"""              Conway's Game of Life
 The classic cellular automata simulation. Press Ctlr+C to stop.
 """
 
