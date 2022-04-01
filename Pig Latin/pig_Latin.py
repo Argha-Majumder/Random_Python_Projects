@@ -5,8 +5,9 @@ message = input()
 
 VOWELS = ('a','e','i','o','u','y')
 
-pigLatin = [] # A list of pig latin words
+pigLatin = []       # A list of pig latin words
 for word in message.split():
+    
     # separate non-letters from the beginning of the word list
     prefixNonletters = ''
     while len(word) > 0 and not word[0].isalpha():
