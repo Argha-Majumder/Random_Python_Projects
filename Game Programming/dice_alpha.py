@@ -1,4 +1,4 @@
-# A simple program a game between user and computer
+# A simple game between user and computer
 import random
 import time
 
