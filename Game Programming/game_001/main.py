@@ -6,7 +6,7 @@ import sys
 import os
 
 # Variables
-worldx = 960
+worldx = 1000
 worldy = 600
 
 fps = 40  # Frame rate
@@ -108,6 +108,17 @@ class Level():
         if lvl == 2:
             print("Level "+str(lvl))
         return enemy_list
+
+# x location, y location, img width, img height, img file
+class Platform(pygame.sprite.Sprite):
+    def __init__(self, xloc, yloc, imgw, imgh, img):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(os.path.join('venv\images\Sprites', img)).convert()
+        self.image.convert_alpha()
+        self.image.set_colorkey(ALPHA)
+        self.rect = self.image.get_rect()
+        self.rect.y = yloc
+        self.rect.x = xloc
 
 # Setup
 clock = pygame.time.Clock()
