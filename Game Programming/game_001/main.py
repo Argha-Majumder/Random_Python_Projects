@@ -11,7 +11,8 @@ Variables
 
 worldx = 1000
 worldy = 600
-
+forwardx = 600
+backwardx = 230
 fps = 40  # Frame rate
 ani = 4  # Animation cycle
 
@@ -35,6 +36,8 @@ class Player(pygame.sprite.Sprite):
         self.movey = 0    # move along y
         self.frame = 0    # count frames
         self.health = 10  # health
+        self.is_jumping = True
+        self.is_falling = False
         self.images = []
         for i in range(1, 5):
             img = pygame.image.load(os.path.join('venv\images\Sprites', 'hero-' + str(i) + '.png')).convert()
@@ -49,6 +52,12 @@ class Player(pygame.sprite.Sprite):
         self.movex += x
         self.movey += y
 
+    # control jump
+    def jump(self):
+        if self.is_jumping is False:
+            self.is_falling = False
+            self.is_jumping = True
+
     # update sprite position
     def update(self):
         self.rect.x = self.rect.x + self.movex
@@ -56,6 +65,7 @@ class Player(pygame.sprite.Sprite):
 
         # moving left
         if self.movex < 0:
+            self.is_jumping = True
             self.frame += 1
             if self.frame > 3 * ani:
                 self.frame = 0
@@ -63,6 +73,7 @@ class Player(pygame.sprite.Sprite):
 
         # moving right
         if self.movex > 0:
+            self.is_jumping = True
             self.frame += 1
             if self.frame > 3 * ani:
                 self.frame = 0
@@ -73,6 +84,41 @@ class Player(pygame.sprite.Sprite):
             self.health -= 1
             print(self.health)
 
+        ground_hit_list = pygame.sprite.spritecollide(self, ground_list, False)
+        for g in ground_hit_list:
+            self.movey = 0
+            self.rect.bottom = g.rect.top
+            self.is_jumping = False       # stop jumping
+
+        # fall of the world
+        if self.rect.y > worldy:
+            self.health -= 1
+            print(self.health)
+            self.rect.x = tx
+            self.rect.y = ty
+
+        if self.is_jumping and self.is_falling is False:
+            self.is_falling = True
+            self.movey -= 33          # how high to jump
+
+        plat_hit_list = pygame.sprite.spritecollide(self, plat_list, False)
+        for p in plat_hit_list:
+            self.is_jumping = False   # stop jumping
+            self.movey = 0
+
+            # approach from below
+            if self.rect.bottom <= p.rect.bottom:
+                self.rect.bottom = p.rect.top
+            else:
+                self.movey += 3.2
+    # simulating gravity
+    def gravity(self):
+        if self.is_jumping:
+            self.movey += 3.2    # how fast player falls
+
+        # if self.rect.y > worldy and self.movey >= 0:
+        #     self.movey = 0
+        #     self.rect.y = worldy-ty-ty
 
 class Enemy(pygame.sprite.Sprite):
     """
@@ -207,7 +253,7 @@ while main:
                 player.control(steps, 0)
 
             if event.key == pygame.K_UP or event.key == ord('w'):
-                print('jump')
+                player.jump()
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == ord('a'):
@@ -220,6 +266,25 @@ while main:
                 pygame.quit()
                 sys.exit()
                 main = False
+
+    # Scroll the world forward
+    if player.rect.x >= forwardx:
+        scroll = player.rect.x - forwardx
+        player.rect.x = forwardx
+        for p in plat_list:
+            p.rect.x -= scroll
+        for e in enemy_list:
+            e.rect.x -= scroll
+
+    # scroll the world backward
+    if player.rect.x <= backwardx:
+        scroll = backwardx - player.rect.x
+        player.rect.x = backwardx
+        for p in plat_list:
+            p.rect.x += scroll
+        for e in enemy_list:
+            e.rect.x += scroll
+    player.gravity()            # check gravity
     player.update()             # update player position
     world.blit(backdrop, backdropbox)
     player_list.draw(world)     # Draw player
