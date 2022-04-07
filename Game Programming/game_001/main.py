@@ -5,7 +5,10 @@ import pygame
 import sys
 import os
 
-# Variables
+'''
+Variables
+'''
+
 worldx = 1000
 worldy = 600
 
@@ -19,22 +22,24 @@ BLACK = (23, 23, 23)
 WHITE = (254, 254, 254)
 ALPHA = (0, 255, 0)
 
+'''
+Objects
+'''
 
-# Objects
 class Player(pygame.sprite.Sprite):
 
     # Spawn a player
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.movex = 0   # move along x
-        self.movey = 0   # move along y
-        self.frame = 0   # count frames
-        self.health = 0  # health
+        self.movex = 0    # move along x
+        self.movey = 0    # move along y
+        self.frame = 0    # count frames
+        self.health = 10  # health
         self.images = []
         for i in range(1, 5):
             img = pygame.image.load(os.path.join('venv\images\Sprites', 'hero-' + str(i) + '.png')).convert()
-            img.convert_alpha()  # Optimise alpha
-            img.set_colorkey(ALPHA)  # Set alpha
+            img.convert_alpha()       # Optimise alpha
+            img.set_colorkey(ALPHA)   # Set alpha
             self.images.append(img)
             self.image = self.images[0]
             self.rect = self.image.get_rect()
@@ -63,7 +68,7 @@ class Player(pygame.sprite.Sprite):
                 self.frame = 0
             self.image = self.images[self.frame // ani]
 
-        hit_list = pygame.sprite.spritecollide(self,enemy_list,False)
+        hit_list = pygame.sprite.spritecollide(self, enemy_list, False)
         for enemy in hit_list:
             self.health -= 1
             print(self.health)
@@ -92,33 +97,69 @@ class Enemy(pygame.sprite.Sprite):
         speed = 8
         if self.counter >= 0 and self.counter <= distance:
             self.rect.x += speed
-        elif self.counter >= distance and self.counter <= distance *2:
+        elif self.counter >= distance and self.counter <= distance * 2:
             self.rect.x -= speed
         else:
             self.counter = 0
         self.counter += 1
 
+
 class Level():
-    def bad(lvl,eloc):
+    def bad(lvl, eloc):
         if lvl == 1:
-            enemy = Enemy(eloc[0], eloc[1], 'venv\images\Sprites\enemy.png')    # spawn enemy
-            enemy_list = pygame.sprite.Group()                                  # create enemy group
-            enemy_list.add(enemy)                                               # add enemy to group
+            enemy = Enemy(eloc[0], eloc[1], 'venv\images\Sprites\enemy.png')  # spawn enemy
+            enemy_list = pygame.sprite.Group()  # create enemy group
+            enemy_list.add(enemy)  # add enemy to group
 
         if lvl == 2:
-            print("Level "+str(lvl))
+            print("Level " + str(lvl))
         return enemy_list
+
+    def ground(lvl, gloc, tx, ty):
+        ground_list = pygame.sprite.Group()
+        i = 0
+        if lvl == 1:
+            while i < len(gloc):
+                ground = Platform(gloc[i], worldy-ty, tx, ty, 'venv\images\Sprites\ground.png')
+                ground_list.add(ground)
+                i = i + 1
+
+        if lvl == 2:
+            print("Level " + str(lvl))
+        return ground_list
+
+    def platform(lvl, tx, ty):
+        plat_list = pygame.sprite.Group()
+        ploc = []
+        i = 0
+        if lvl == 1:
+            ploc.append((200, worldy-ty-128, 3))
+            ploc.append((300, worldy-ty-256, 3))
+            ploc.append((500, worldy-ty-128, 4))
+            while i < len(ploc):
+                j = 0
+                while j <= ploc[i][2]:
+                    plat = Platform((ploc[i][0]+(j*tx)), ploc[i][1], tx, ty, 'venv\images\Sprites\\block-big.png')
+                    plat_list.add(plat)
+                    j = j + 1
+                print('run'+str(i)+str(ploc[i]))
+                i = i + 1
+        if lvl == 2:
+            print("Level " + str(lvl))
+        return plat_list
+
 
 # x location, y location, img width, img height, img file
 class Platform(pygame.sprite.Sprite):
     def __init__(self, xloc, yloc, imgw, imgh, img):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join('venv\images\Sprites', img)).convert()
+        self.image = pygame.image.load(os.path.join('venv\images\Sprites', 'ground.png')).convert()
         self.image.convert_alpha()
         self.image.set_colorkey(ALPHA)
         self.rect = self.image.get_rect()
         self.rect.y = yloc
         self.rect.x = xloc
+
 
 # Setup
 clock = pygame.time.Clock()
@@ -129,19 +170,28 @@ backdrop = pygame.image.load(os.path.join('venv\images\Backgrounds', 'background
 backdropbox = world.get_rect()
 
 player = Player()  # Spawn player
-player.rect.x = 0  # go to x
-player.rect.y = 0  # go to y
+player.rect.x = 0   # go to x
+player.rect.y = 30  # go to y
 player_list = pygame.sprite.Group()
 player_list.add(player)
 steps = 10  # how many pixels to move
-# enemy = Enemy(300, 0, 'venv\images\Sprites\enemy.png')  # spawn enemy
-# enemy_list = pygame.sprite.Group()  # create enemy group
-# enemy_list.add(enemy)  # add enemy to group
 eloc = []
-eloc = [300,0]
+eloc = [300, 0]
 enemy_list = Level.bad(1, eloc)
+gloc = []
+tx = 64
+ty = 64
+i = 0
+while i <= (worldx/tx)+tx:
+    gloc.append(i*tx)
+    i = i+1
+ground_list = Level.ground(1, gloc, tx, ty)
+plat_list = Level.platform(1, tx, ty)
 
-# Main loop
+'''
+Main loop
+'''
+
 while main:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -170,10 +220,12 @@ while main:
                 pygame.quit()
                 sys.exit()
                 main = False
-    player.update()  # update player position
+    player.update()             # update player position
     world.blit(backdrop, backdropbox)
-    player_list.draw(world)  # Draw player
-    enemy_list.draw(world)  # refresh enemy
+    player_list.draw(world)     # Draw player
+    enemy_list.draw(world)      # refresh enemy
+    ground_list.draw(world)     # refresh ground
+    plat_list.draw(world)       # refresh platform
     for e in enemy_list:
         e.move()
     pygame.display.flip()
