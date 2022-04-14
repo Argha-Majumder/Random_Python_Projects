@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from PIL import Image
-import os.path
 import sys
 
 if len(sys.argv) > 1:
@@ -13,4 +12,4 @@ img = Image.open(pic)
 X = img.size[0]
 Y = img.size[1]
 
-print(X,Y)
+print(X, Y)

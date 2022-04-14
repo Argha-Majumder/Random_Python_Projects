@@ -26,6 +26,16 @@ ALPHA = (0, 255, 0)
 '''
 Objects
 '''
+# x location, y location, img width, img height, img file
+class Platform(pygame.sprite.Sprite):
+    def __init__(self, xloc, yloc, imgw, imgh, img):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(os.path.join('venv\images\Sprites', 'ground.png')).convert()
+        self.image.convert_alpha()
+        self.image.set_colorkey(ALPHA)
+        self.rect = self.image.get_rect()
+        self.rect.y = yloc
+        self.rect.x = xloc
 
 class Player(pygame.sprite.Sprite):
 
@@ -149,7 +159,6 @@ class Enemy(pygame.sprite.Sprite):
             self.counter = 0
         self.counter += 1
 
-
 class Level():
     def bad(lvl, eloc):
         if lvl == 1:
@@ -194,18 +203,14 @@ class Level():
             print("Level " + str(lvl))
         return plat_list
 
-
-# x location, y location, img width, img height, img file
-class Platform(pygame.sprite.Sprite):
-    def __init__(self, xloc, yloc, imgw, imgh, img):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join('venv\images\Sprites', 'ground.png')).convert()
-        self.image.convert_alpha()
-        self.image.set_colorkey(ALPHA)
-        self.rect = self.image.get_rect()
-        self.rect.y = yloc
-        self.rect.x = xloc
-
+    def loot(lvl):
+        if lvl == 1:
+            loot_list = pygame.sprite.Group()
+            loot = Platform(tx*9, ty*5, tx, ty, 'venv\images\PNG\Items\loot-1.png')
+            loot_list.add(loot)
+        if lvl == 2:
+            print(lvl)
+        return loot_list
 
 # Setup
 clock = pygame.time.Clock()
@@ -220,6 +225,7 @@ player.rect.x = 0   # go to x
 player.rect.y = 30  # go to y
 player_list = pygame.sprite.Group()
 player_list.add(player)
+loot_list = Level.loot(1)
 steps = 10  # how many pixels to move
 eloc = []
 eloc = [300, 0]
@@ -291,6 +297,7 @@ while main:
     enemy_list.draw(world)      # refresh enemy
     ground_list.draw(world)     # refresh ground
     plat_list.draw(world)       # refresh platform
+    loot_list.draw(world)
     for e in enemy_list:
         e.move()
     pygame.display.flip()
