@@ -98,13 +98,13 @@ class Board:
 
 class TicTacToe:
     def __init__(self):
-        self.__numPlayers = 0
+        self.__numPlayers = 0   # Initalize number of players with 0
     
     def startGame(self):
-        self.__numPlayers += 1
+        self.__numPlayers += 1  # Incrementing by 1
         player1 = self.takePlayerInput(self.__numPlayers)
 
-        self.__numPlayers += 1
+        self.__numPlayers += 1  # Incrementing by 1 again
         player2 = self.takePlayerInput(self.__numPlayers)
         
         while player1.symbol == player2.symbol:          # If two symbols are same then player2 has to make a change
@@ -122,7 +122,7 @@ class TicTacToe:
                 print("Enter y: ")
                 y = int(input())
                 status = board.move(player1.symbol,x,y)
-                if status==board.INVALIDMOVE:
+                if status==board.INVALIDMOVE:            # If player1 make an invalid move
                     print("Invalid move!! Please try again!")
                     continue
             else:
@@ -132,7 +132,7 @@ class TicTacToe:
                 print("Enter y: ")
                 y = int(input())
                 status = board.move(player2.symbol,x,y)
-                if status==board.INVALIDMOVE:
+                if status==board.INVALIDMOVE:           # If player2 make an invalid move
                     print("Invalid move!! Please try again!")
                     continue
             player1Turn = not (player1Turn)
